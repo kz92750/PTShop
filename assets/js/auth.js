@@ -1,11 +1,10 @@
 // Auth helper for frontend pages
 // Configure API endpoint used for authentication. Change to your backend URL if needed.
-const AUTH_API = window.AUTH_API || '/api/auth.php';
+const AUTH_API = window.AUTH_API || 'http://localhost:5000/api/auth';
 
 async function login() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    const remember = document.getElementById('rememberMe').checked;
 
     const alertBox = document.getElementById('loginAlert');
 
@@ -17,14 +16,16 @@ async function login() {
     showAlert(alertBox, 'info', 'Logowanie...');
 
     try {
-        const res = await fetch(AUTH_API, {
+        const res = await fetch(`${AUTH_API}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'login', email, password, remember }),
+            body: JSON.stringify({ email, password }),
             credentials: 'include'
         });
         const data = await res.json();
         if (data.success) {
+            // store token (example: in memory or localStorage). Prefer cookies in production.
+            if (data.token) localStorage.setItem('pt_token', data.token);
             showAlert(alertBox, 'success', 'Zalogowano pomyślnie. Przekierowanie...');
             setTimeout(() => window.location.href = 'index.php', 800);
         } else {
@@ -60,10 +61,10 @@ async function registerUser() {
     showAlert(alertBox, 'info', 'Rejestracja...');
 
     try {
-        const res = await fetch(AUTH_API, {
+        const res = await fetch(`${AUTH_API}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'register', name, email, password }),
+            body: JSON.stringify({ name, email, password }),
             credentials: 'include'
         });
         const data = await res.json();
